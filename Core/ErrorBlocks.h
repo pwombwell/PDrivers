@@ -1,0 +1,68 @@
+#ifndef CORE_ERRORBLOCKS_H
+#define CORE_ERRORBLOCKS_H
+
+#include "Constants.h"
+
+#include "RLib/OS/Error.h"
+
+DECLARE_INTERNAT_ERROR_BLOCK(Escape, "Escape");
+DECLARE_INTERNAT_ERROR_BLOCK(HeapFail_Alloc, "HeapFailAlloc");
+
+// List of error blocks that refer to the Messages file.
+DECLARE_INTERNAT_ERROR_BLOCK(PrintBadFeatures, "BadFeat");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintNoJobSelected, "NoJbSel");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintNoSuchJob, "NoJob");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintNoCurrentPage, "NoPage");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintPrintingPage, "PrintP");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintInvalidCopies, "BadCops");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintBadHalftone, "BadHton");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintCancelled, "PCancel");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintNotOnePage, "NotOneP");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintOverflow, "BufOFlo");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintBadMiscOp, "BadMOp");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintNoDuplicates, "NoDup");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintNoColour, "NoCol");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintColourNotConfig, "NotConf");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintNoScreenDump, "NoSDump");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintBadTransform, "BadTran");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintRectanglesMiss, "RecMiss");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintNoFreeMemory, "NoMem");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintNoIncludedFiles, "NoIncl");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintBadSetPrinter, "NoPDSet");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintJPEGNoSupp, "JPNoSup");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintInUse, "PDrUsed");
+DECLARE_INTERNAT_ERROR_BLOCK(PDumperUndeclared, "PDUndec");
+DECLARE_INTERNAT_ERROR_BLOCK(PDumperTooOld, "TooOld");
+DECLARE_INTERNAT_ERROR_BLOCK(PDumperDuplicateModule, "DupPDNo");
+DECLARE_INTERNAT_ERROR_BLOCK(PDumperBadStrip, "BadStrp");
+DECLARE_INTERNAT_ERROR_BLOCK(PDumperInUse, "PDuUsed");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintCantPrinterVDU, "NoVDU");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintCantVDU4, "NoVDU4");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintCantModeChange, "NoModCh");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintCantThisVDU23, "NoVDU23");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintCantHorizFill, "NoHFill");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintCantFloodFill, "NoFFill");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintCantCopyMove, "NoBlkOp");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintCantUndefPlot, "NoUPlot");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintCantDrawPlot, "NoDPlot");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintCantThisFill, "NoFill");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintCantThisFontPaint, "NoFPnt");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintCantThisSpriteOp, "NoSprOp");
+
+DECLARE_INTERNAT_ERROR_BLOCK(BadPathElement, "PathEl");
+DECLARE_INTERNAT_ERROR_BLOCK(BadPathSequence, "PathSeq");
+
+#if !DoFontSpriteVdu
+DECLARE_INTERNAT_ERROR_BLOCK(PrintCantFontSpriteVDU, "NoFSVDU");
+#endif
+
+#if VectorErrors
+DECLARE_INTERNAT_ERROR_BLOCK(PrintCantUnkColV, "PrintCantUnkColV");
+#endif
+
+#if DoFontSpriteVdu
+DECLARE_INTERNAT_ERROR_BLOCK(FontTooLong, "FontTooLong");
+DECLARE_INTERNAT_ERROR_BLOCK(PrintNoCurrentSprite, "PrintNoCurrentSprite");
+#endif
+
+#endif
