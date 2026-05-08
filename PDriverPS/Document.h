@@ -43,16 +43,16 @@ public:
         m_declaredFonts.addHead(node);
     }
 
-    PrinterFontMapping& fontMapping() { return m_fontMapping; }
-    const PrinterFontMapping& fontMapping() const { return m_fontMapping; }
+    PrinterFontNameEntry& FontNameEntry() { return m_FontNameEntry; }
+    const PrinterFontNameEntry& FontNameEntry() const { return m_FontNameEntry; }
 
-    const char* mappedFont(FontHandle handle) const { return m_fontMapping.lookup(handle); }
-    void setMappedFont(FontHandle handle, const char* psFontName) { m_fontMapping.remember(handle, psFontName); }
-    void clearMappedFont(FontHandle handle) { m_fontMapping.forget(handle); }
+    const char* mappedFont(FontHandle handle) const { return m_FontNameEntry.lookup(handle); }
+    void setMappedFont(FontHandle handle, const char* psFontName) { m_FontNameEntry.remember(handle, psFontName); }
+    void clearMappedFont(FontHandle handle) { m_FontNameEntry.forget(handle); }
 
 private:
     DeclaredFontList m_declaredFonts;
-    PrinterFontMapping m_fontMapping;
+    PrinterFontNameEntry m_FontNameEntry;
     bool             m_hasDeclaredFonts;
 };
 

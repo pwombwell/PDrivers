@@ -252,7 +252,7 @@ struct ModeWord {
     typedef OS::Mode OSMode; // work around a norcroft bug
     operator OSMode() const { return OS::Mode(m_word); }
 
-    bool isModeNumber() const { return m_word > 256; }
+    bool isModeNumber() const { return m_word < 256; }
 
     bool hasWideMask() const { return (m_word >> 31) != 0; }
     Type type() const;
@@ -302,8 +302,8 @@ struct ModeWord3 {
 
     Type type() const { return Type((m_word >> 27) & 0x0f); }
 
-    uint8_t dpiH() const { return (m_word >>  1) & 0x13; }
-    uint8_t dpiV() const { return (m_word >> 14) & 0x13; }
+    uint16_t dpiH() const { return (m_word >>  1) & 0x1fff; }
+    uint16_t dpiV() const { return (m_word >> 14) & 0x1fff; }
 
     uint16_t modeFlags() const {
         switch (type()) {
@@ -368,7 +368,8 @@ public:
     void invalidate() { m_pairs = nullptr; m_entries = 0; }
 
     static bool isValidPaletteSize(size_t size) {
-        return size == 16*8 || size == 64*8 || size == 256*8;
+        return size == 2*8 || size == 4*8 || size == 16*8 ||
+               size == 64*8 || size == 256*8;
     }
 
 private:

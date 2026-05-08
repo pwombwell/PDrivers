@@ -406,7 +406,7 @@ static MyError sprite_setcolour(uint32_t *colourbounds_base,
         }
 
         case ColourMapping::None:
-            rgb = pixval_lookup(pixval >> 2, job);
+            rgb = pixval_lookup(pixval >> 2);
             break;
     }
 
@@ -621,7 +621,7 @@ static MyError sprite_putchunk_allatonce(const uint8_t *data_base,
 
                 case ColourMapping::None: {
                     // Otherwise, look up screen RGB, the convert to grey.
-                    uint32_t rgb = pixval_lookup(pixval, job);
+                    uint32_t rgb = pixval_lookup(pixval);
                     grey = ColourUtils_rgbtogrey(rgb);
                     break;
                 }

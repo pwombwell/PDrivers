@@ -44,16 +44,6 @@ public:
             Sprite::VDUContext jpeg_buffersp_save;
         } jpegPlotting;
 
-        struct {
-#if !PSTextSpeedUps
-            FontHandle currentPSfont;
-#endif
-
-            uint32_t pendingrubout_rgb;
-            OS::Millipoint pendingrubout_left;
-            uint32_t enumeration_buf[3];
-
-        } fontPlotting;
 
         struct {
             char chardefnblock[9];

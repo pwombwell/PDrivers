@@ -16,12 +16,11 @@ finalisation-code: Module_Finalisation
 ;   &78: Service_PDriverGetMessages
 service-call-handler: Module_Service &27 &46 &57 &65 &78
 
-vector-handlers: wrch_vector(error-capable:),
-    colour_vector(error-capable:),
+vector-handlers: colour_vector(error-capable:),
     draw_vector(error-capable:),
     sprite_vector(error-capable:)
 
-vector-traps: monitor_sprite_vector byte_vector
+vector-traps: monitor_sprite_vector, byte_vector, wrch_vector
 
 pdriver-handler: pdriver_entry,
 	PDriver_Info_Handler,

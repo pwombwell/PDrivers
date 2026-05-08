@@ -30,6 +30,8 @@ struct _kernel_oserror;
 namespace riscos {
 namespace OS {
 
+// Another attempt at a kernel_oserror replacement. Passed as pointer only as
+// it's trailed by the message.
 struct ErrorNumber {
     uint32_t errnum;
 

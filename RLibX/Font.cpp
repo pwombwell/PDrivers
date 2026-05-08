@@ -24,63 +24,68 @@ MyError Font::convertToPoints(OS::Unit x, OS::Unit y,
                  x, y, &xOut, &yOut);
 }
 
-MyError Font::convertToPoints(Point<OS::Unit> p, Point<OS::Millipoint>& pOut)
+MyError Font::convertToPoints(Geometry::Point<OS::Unit> p, Font::Point& pOut)
 {
     return _swix(Font_Converttopoints, _INR(1,2) | _OUTR(1,2),
                  p.x, p.y, &pOut.x, &pOut.y);
 }
 
-MyError Font::convertToPoints(Offset<OS::Unit> p, Offset<OS::Millipoint>& pOut)
+MyError Font::convertToPoints(Geometry::Offset<OS::Unit> p, Font::Offset& pOut)
 {
     return _swix(Font_Converttopoints, _INR(1,2) | _OUTR(1,2),
                  p.dx, p.dy, &pOut.dx, &pOut.dy);
 }
 
-MyError scanString(FontHandle handle,
-                   const uint8_t* str,
-                   uint32_t flags,
-                   Offset<OS::Millipoint>& offset,
-                   const ScanStringBlock& coordBlock,
-                   uint32_t length,
-                   uint32_t* splitOut)
+MyError scanString(FontHandle handle, const uint8_t* str, size_t len,
+                   Font::Offset& offset)
 {
-    uint32_t split;
-
-    MyError err = _swix(Font_ScanString,
-                        _INR(0,5) | _IN(7) | _OUT(3) | _OUT(4) | _OUT(7),
-                        handle, str, flags, offset.dx, offset.dy, &coordBlock, length,
-                        &offset.dx, &offset.dy, &split);
-
-    if (err != nullptr)
-        return err;
-
-    if (splitOut != nullptr)
-        *splitOut = split;
-
-    return nullptr;
+    const ScanStringFlag flags = ScanStringFlag_Length | ScanStringFlag_UseHandle;
+    return _swix(Font_ScanString,
+                 _INR(0,4) | _IN(7) | _OUTR(3,4),
+                 handle, str, flags, offset.dx, offset.dy, len,
+                 &offset.dx, &offset.dy);
 }
 
-MyError scanString(FontHandle handle,
-                   const uint8_t* str,
-                   uint32_t flags,
-                   Offset<OS::Millipoint>& offset,
-                   uint32_t length,
-                   uint32_t* splitOut)
+MyError scanStringWithKerning(FontHandle handle, const uint8_t* str, size_t len,
+                              Font::Offset& offset)
 {
-    uint32_t split;
+    const ScanStringFlag flags = ScanStringFlag_Length |
+                                 ScanStringFlag_UseHandle |
+                                 ScanStringFlag_Kern;
+    return _swix(Font_ScanString,
+                 _INR(0,4) | _IN(7) | _OUTR(3,4),
+                 handle, str, flags, offset.dx, offset.dy, len,
+                 &offset.dx, &offset.dy);
+}
 
-    MyError err = _swix(Font_ScanString,
-                        _INR(0,4) | _IN(7) | _OUT(3) | _OUT(4) | _OUT(7),
-                        handle, str, flags, offset.dx, offset.dy, length,
-                        &offset.dx, &offset.dy, &split);
+MyError scanString(FontHandle handle, const uint8_t* str, size_t len,
+                   ScanStringFlag flags, const ScanStringBlock& coordBlock,
+                   Font::Offset& offset)
+{
+    return _swix(Font_ScanString,
+                 _INR(0,5) | _IN(7) | _OUTR(3,4),
+                 handle, str, flags, offset.dx, offset.dy, &coordBlock, len,
+                 &offset.dx, &offset.dy);
+}
 
-    if (err != nullptr)
-        return err;
+MyError scanString(FontHandle handle, const uint8_t* str, size_t len,
+                   ScanStringFlag flags, const ScanStringBlock& coordBlock,
+                   Font::Offset& offset)
+{
+    return _swix(Font_ScanString,
+                 _INR(0,5) | _IN(7) | _OUTR(3,4),
+                 handle, str, flags, offset.dx, offset.dy, &coordBlock, len,
+                 &offset.dx, &offset.dy);
+}
 
-    if (splitOut != nullptr)
-        *splitOut = split;
-
-    return nullptr;
+MyError scanString(FontHandle handle, const uint8_t* str, size_t len,
+                   ScanStringFlag flags, const ScanStringBlock& coordBlock,
+                   Font::Offset& offset, uint32_t& splitCount)
+{
+    return _swix(Font_ScanString,
+                 _INR(0,5) | _IN(7) | _OUTR(3,4) | _OUT(7),
+                 handle, str, flags, offset.dx, offset.dy, &coordBlock, len,
+                 &offset.dx, &offset.dy, &splitCount);
 }
 
 MyError xsetFont(FontHandle font)
@@ -100,6 +105,11 @@ MyError xlistFonts(char* buffer, int32_t* context, int32_t path)
     if (context != nullptr)
         *context = currentContext;
     return nullptr;
+}
+
+MyError currentFont(FontHandle& font)
+{
+    return _swix(Font_CurrentFont, _OUT(0), &font);
 }
 
 } } // namespace riscos::Font

@@ -14,33 +14,21 @@
 
 #include <string.h>
 
-static uint8_t *vducharsdefined_bytes(JobWS& job)
-{
-    return (uint8_t *)job.vducharsdefined;
-}
-
-static uint8_t *vducharsdefined_base(JobWS& job)
-{
-    return vducharsdefined_bytes(job) - 4;
-}
-
 static MyError vdu5_define(uint8_t ch,
-                           JobWS& jobWS,
-                           PDriverWS& psWS)
+                           JobWS& jobWS)
 {
-    if (ch == 127) {
+    if (ch < 32 || ch == 127)
         return nullptr;
-    }
 
     Output& output(jobWS.output());
     MyError err = output.str(ch);
-    if (err) {
+    if (err)
         return err;
-    }
+
     if ((err = output.str("DC ")) != nullptr)
         return err;
 
-    uint8_t *block = (uint8_t *)psWS.globaltempws.vdu5Plotting.chardefnblock;
+    uint8_t *block = (uint8_t *)PDriverWS::instance().globaltempws.vdu5Plotting.chardefnblock;
     block[0] = ch;
     if ((err = XOS_Word(0x0A, block)) != nullptr)
         return err;
@@ -55,22 +43,19 @@ static MyError vdu5_define(uint8_t ch,
     if ((err = output.str("\n")) != nullptr)
         return err;
 
-    uint8_t *base = vducharsdefined_base(jobWS);
-    uint32_t index = ch >> 3;
+    uint32_t index = (ch - 32) >> 3;
     uint8_t mask = (uint8_t)(1u << (ch & 7u));
-    base[index] |= mask;
+    jobWS.vducharsdefined[index] |= mask;
+
     return nullptr;
 }
 
-static MyError vdu5_emptybuffer(uint32_t count, CoreWS& ws)
+static MyError vdu5_emptybuffer(uint32_t count, JobWS& job)
 {
     if (count == 0)
         return nullptr;
 
     MyError err;
-
-    JobWS& job(*(JobWS*)ws.currentJob());
-    PDriverWS& psWS = (PDriverWS&)ws;
     Output& output(job.output());
 
     const Size<OS::Unit>& size(job.vdu5().charSize());
@@ -88,27 +73,30 @@ static MyError vdu5_emptybuffer(uint32_t count, CoreWS& ws)
 #endif
 
     uint8_t *buf = (uint8_t *)job.textbuffer;
-    uint8_t *base = vducharsdefined_base(job);
 
     for (uint32_t i = 0; i < count; ++i) {
         uint8_t ch = buf[i];
-        uint32_t index = ch >> 3;
-        uint8_t mask = (uint8_t)(1u << (ch & 7u));
-        if ((base[index] & mask) != 0)
+        if (ch < 32 || ch == 127)
             continue;
 
-        if ((err = vdu5_define(ch, job, psWS)) != nullptr)
+        uint32_t index = (ch - 32) >> 3;
+        uint8_t mask = (uint8_t)(1u << (ch & 7u));
+
+        if ((job.vducharsdefined[index] & mask) != 0)
+            continue;
+
+        if ((err = vdu5_define(ch, job)) != nullptr)
             return err;
     }
 
-    if ((err = output_PSstring(buf, count, output)) != nullptr)
+    if ((err = output.psString(buf, count)) != nullptr)
         return err;
 
-    if ((err = output_coordpair(job.startofvdu5str, output)) != nullptr)
+    if ((err = output.writeCoordPair(job.startofvdu5str)) != nullptr)
         return err;
-    if ((err = output_coordpair(size, output)) != nullptr)
+    if ((err = output.writeCoordPair(size)) != nullptr)
         return err;
-    if ((err = output_coordpair(job.vdu5().autoAdvance(), output)) != nullptr)
+    if ((err = output.writeCoordPair(job.vdu5().autoAdvance())) != nullptr)
         return err;
     if ((err = output.str("V\n")) != nullptr)
         return err;
@@ -117,32 +105,34 @@ static MyError vdu5_emptybuffer(uint32_t count, CoreWS& ws)
     return nullptr;
 }
 
-MyError vdu5_char(uint8_t ch, Point<OS::Unit> p, CoreWS& ws)
+MyError vdu5_char(uint8_t c, const Point<OS::Unit>& p, CoreJobWS& coreJob)
 {
-// in vdu5_char or vdu5_emptybuffer
-    debugLog("VDU5 captured '%c' %u\n", ch >= 32 ? ch : '.', ch);   
-    
-    JobWS& job(*(JobWS*)ws.currentJob());
+    JobWS& job((JobWS&)coreJob);
+
+    // in vdu5_char or vdu5_emptybuffer
+    debugLog("VDU5 captured '%c' %u\n", c >= 32 ? c : '.', c);
+
     uint32_t pos = job.wrch().textBufferPos();
     if (pos == 0)
         job.startofvdu5str = p;
 
-    uint8_t *buf = (uint8_t *)job.textbuffer;
-    buf[pos] = ch;
+    uint8_t* buf = (uint8_t*)job.textbuffer;
+    buf[pos] = c;
     pos++;
     job.wrch().setTextBufferPos((uint8_t)pos);
 
     if (pos >= textbufferlen) {
-        return vdu5_emptybuffer(pos, ws);
+        return vdu5_emptybuffer(pos, job);
     }
     return nullptr;
 }
 
-MyError vdu5_delete(Point<OS::Unit> p, CoreWS& ws)
+MyError vdu5_delete(const Point<OS::Unit>& p, CoreJobWS& coreJob)
 {
-    JobWS& job(*(JobWS*)ws.currentJob());
+    MyError err;
+    JobWS& job((JobWS&)coreJob);
     Output& output(job.output());
-    MyError err = nullptr;
+
 #if PSCoordSpeedUps
     if ((err = ensure_OScoords(output, job)) != nullptr)
         return err;
@@ -161,12 +151,13 @@ MyError vdu5_delete(Point<OS::Unit> p, CoreWS& ws)
 
 MyError vdu5_flush(CoreJobWS& coreJob)
 {
-    CoreWS& ws = CoreWS::instance();
-    uint8_t count = coreJob.wrch().textBufferPos();
-    if (count == 0) {
+    JobWS& job((JobWS&)coreJob);
+
+    uint8_t count = job.wrch().textBufferPos();
+    if (count == 0)
         return nullptr;
-    }
-    return vdu5_emptybuffer(count, ws);
+
+    return vdu5_emptybuffer(count, job);
 }
 
 void vdu5_changed(CoreJobWS& coreJob, uint32_t code)
@@ -178,8 +169,11 @@ void vdu5_changed(CoreJobWS& coreJob, uint32_t code)
         return;
     }
 
-    uint8_t *base = vducharsdefined_base(job);
-    uint32_t index = code >> 3;
+    if (code < 32 || code == 127)
+        return;
+
+    uint32_t index = (code - 32) >> 3;
     uint8_t mask = (uint8_t)(1u << (code & 7u));
-    base[index] &= (uint8_t)~mask;
+
+    job.vducharsdefined[index] &= (uint8_t)~mask;
 }

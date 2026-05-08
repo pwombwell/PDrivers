@@ -84,115 +84,12 @@ static MyError output_expansionbuffer(PDriverWS& ws,
     return output_stringN((const char*)ws.expansionbuffer, len, 1, 126, output);
 }
 
-/* Output a string of printable characters as a PostScript string, taking care:
- *   (a) not to produce lines of more than 72 characters.
- *   (b) to output characters outside the range ASCII 32-126 as octal escape
- *       sequences.
- *   (c) to output "(", ")" and "\\" as escape sequences.
- */
-static MyError output_PSstring_dir(const uint8_t* str,
-                                   uint32_t len,
-                                   int step,
-                                   Output& output)
-{
-    MyError err;
-    const uint8_t* p = str;
-    if (step < 0 && len != 0) {
-        p = str + len - 1;
-    }
-    uint32_t linecount = 1;
-
-    if ((err = output.str('(')) != nullptr)
-        return err;
-
-    while (len-- > 0) {
-        if (linecount >= 68) {
-            if ((err = output.str('\\')) != nullptr)
-                return err;
-
-            if ((err = output.str('\n')) != nullptr)
-                return err;
-
-            linecount = 0;
-            int escaped = 0;
-#if PSDebugEscapes
-            err = readescapestate(&escaped);
-#else
-            bool escapedBool = false;
-            err = OS::xreadEscapeState(escapedBool);
-            escaped = escapedBool;
-#endif
-            if (err)
-                return err;
-
-            if (escaped)
-                return ErrorBlock_Escape;
-        }
-
-        uint8_t ch = *p;
-        p += step;
-
-        if (ch < ' ' || ch >= 126) {
-            linecount += 3;
-
-            if ((err = output.str('\\')) != nullptr)
-                return err;
-
-            if ((err = output.num((uint8_t)('0' + (ch >> 6)))) != nullptr)
-                return err;
-
-            if ((err = output.num((uint8_t)('0' + ((ch >> 3) & 0x7)))) != nullptr)
-                return err;
-
-            ch = (uint8_t)('0' + (ch & 0x7));
-            linecount += 1;
-
-            if ((err = output.byte(ch)) != nullptr)
-                return err;
-
-            continue;
-        }
-
-        if (ch == '\\' || ch == '(' || ch == ')') {
-            linecount += 1;
-
-            if ((err = output.str('\\')) != nullptr)
-                return err;
-        }
-
-        linecount += 1;
-
-        if ((err = output.str(ch)) != nullptr)
-            return err;
-    }
-
-    if ((err = output.str(')')) != nullptr)
-        return err;
-
-    return output.str('\n');
-}
-
-MyError output_PSstringBackwards(const uint8_t* str,
-                                 uint32_t len,
-                                 Output& output)
-{
-    return output_PSstring_dir(str, len, -1, output);
-}
-
-MyError output_PSstring(const uint8_t* str,
-                        uint32_t len,
-                        Output& output)
-{
-    return output_PSstring_dir(str, len, 1, output);
-}
-
 /* Ensure that we are using the OS co-ordinate system. */
-MyError ensure_OScoords(Output& output,
-                        JobWS& jobWS)
+MyError ensure_OScoords(Output& output, JobWS& job)
 {
-    if (jobWS.coordsystem != 0) {
-        jobWS.coordsystem = 0;
-        return output_grestore(jobWS);
+    if (job.coordsystem != 0) {
+        job.coordsystem = 0;
+        return output_grestore(job);
     }
     return nullptr;
 }
@@ -200,8 +97,7 @@ MyError ensure_OScoords(Output& output,
 /* Ensure that we are using the text co-ordinate system with the correct
  * current font factors.
  */
-MyError ensure_textcoords(Output& output,
-                          JobWS& jobWS)
+MyError ensure_textcoords(Output& output, JobWS& jobWS)
 {
     int32_t scale_x, scale_y;
     MyError err = Font::xreadScaleFactor(scale_x, scale_y);
@@ -343,6 +239,16 @@ MyError output_coordpair(Size<OS::Unit> value, Output& output)
 MyError output_coordpair(Point<Draw::Unit> value, Output& output)
 {
     return output.writeCoordPair(value);
+}
+
+MyError output_coordpair(Point<OS::Millipoint> point, Output& output)
+{
+    return output.writeCoordPair(point);
+}
+
+MyError output_coordpair(Offset<OS::Millipoint> offset, Output& output)
+{
+    return output.writeCoordPair(offset);
 }
 
 MyError output_rgbvalue(uint32_t bbGGRR00, Output& output)

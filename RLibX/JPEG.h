@@ -26,6 +26,15 @@ enum PrintFlags {
 // Minimal container for info from the header, parsed by JPEG_Info.
 class Info {
 public:
+    Info()
+        : m_width(0)
+        , m_height(0)
+        , m_flags(InfoFlags(0))
+        , m_dpiX(0)
+        , m_dpiY(0)
+        , m_workspace(0)
+    { }
+
     MyError parse(const void* jpeg, uint32_t len);
 
     uint32_t  width() const  { return m_width; }

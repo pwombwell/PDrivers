@@ -45,9 +45,9 @@ static MyError managejob_outputfontcomment(FontSupplied supplied,
     bool firstLine = true;
     // Original asm called PDriver_MiscOp. I have no idea why since that goes
     // straight to the given Job's font list.
-    for (FontBlock* font = job.jobfontlist.head(); font != nullptr; font = font->next())
+    for (FontNameEntry* font = job.jobfontlist.head(); font != nullptr; font = font->next())
     {
-        FontBlockWord word = font->word();
+        FontNameEntry::Word word = font->word();
         debugLog("managejob fontcomment consider block:%p riscos:%s alien:%s word:0x%x supplied:%u",
                  font,
                  font->riscos(),

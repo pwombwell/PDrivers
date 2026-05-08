@@ -5,6 +5,7 @@
 
 #include "PDriverPS.h"
 #include "Document.h"
+#include "FontChunkPainter.h"
 #include "Output.h"
 
 #include "Common/Ascii85.h"
@@ -27,18 +28,17 @@ public:
         : CoreJobWS(file, illustration, ws)
         , m_output(file)
         , m_document(PS::Document::Flag_None, PS::Document::Level_L1)
+        , m_chunkPainter(*this)
     {
     }
 
     PS::Document& document() { return m_document; }
     const PS::Document& document() const { return m_document; }
 
-    FontColourContext& fontColours() { return m_fontColours; }
-    const FontColourContext& fontColours() const { return m_fontColours; }
-
     Output& output() { return m_output; }
 
-
+    PSFontChunkPainter& chunkPainter() { return m_chunkPainter; }
+    const PSFontChunkPainter& chunkPainter() const { return m_chunkPainter; }
 
 
 
@@ -57,7 +57,7 @@ public:
     // only if bit (C MOD 32) is set in word (C DIV 32)-1 in the following array
     // of seven words, or equivalently if bit (C MOD 8) is set in byte
     // (C DIV 8)-4.
-    uint32_t vducharsdefined[7];
+    uint8_t vducharsdefined[7*4];
 
 #if PSCoordSpeedUps
     uint32_t coordsystem;
@@ -68,7 +68,7 @@ public:
 private:
     Output              m_output;
     PS::Document        m_document;
-    FontColourContext   m_fontColours;
+    PSFontChunkPainter  m_chunkPainter;
 };
 
 class ColourJob : public JobWS

@@ -12,7 +12,11 @@ namespace riscos {
 // Values based on cmunge's return values - error pointer or bool.
 class VectorReturn {
 public:
+    VectorReturn() : m_ret(0) { }
     VectorReturn(const MyError& error) { m_ret = uint32_t(uintptr_t(error.raw())); }
+    /*explicit*/ VectorReturn(const _kernel_oserror* error) {
+        m_ret = uint32_t(uintptr_t(error));
+    }
 
     static VectorReturn claim() { VectorReturn v; v.m_ret = 0; return v; }
     static VectorReturn pass() { VectorReturn v; v.m_ret = 1; return v; }
@@ -26,8 +30,6 @@ public:
     _kernel_oserror* toCMHGTrap() const { return (_kernel_oserror*)m_ret; }
 
 private:
-    VectorReturn() {}
-
     uint32_t m_ret;
 };
 

@@ -19,7 +19,7 @@ public:
     uint32_t& operator[](size_t i) { return m_regs[i]; }
     uint32_t operator[](size_t i) const { return m_regs[i]; }
 
-    // Helpers to avoid "implicit casts of 32-bit to pointer" warnings when
+    // Helper to avoid "implicit casts of 32-bit to pointer" warnings when
     // compiling on 64-bit hosts. Obviously the reg values must not contain
     // actual pointers on those machines.
     //
@@ -29,6 +29,7 @@ public:
         return (T)(uintptr_t)m_regs[i];
     }
 
+    // Helper to avoid "implicit casts of 32-bit to pointer" warnings.
     template <typename T> T as(size_t i) const {
         return (T)(uintptr_t)m_regs[i];
     }

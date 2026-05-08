@@ -421,7 +421,6 @@ MyError pagebox_nextbox(uint32_t& copies,
                         CoreJobWS& coreJob)
 {
     MyError err;
-    CoreWS& ws = CoreWS::instance();
     JobWS& job = toJobWS(coreJob);
 
     Output& output(job.output());
@@ -569,15 +568,13 @@ MyError pagebox_cleartobg(CoreJobWS& coreJob)
 
 MyError pagebox_setnewbox(const Geometry::Rect<OS::Unit>& box, CoreJobWS& coreJob)
 {
-    CoreWS& ws = CoreWS::instance();
     JobWS& job = *(JobWS *)&coreJob;
     Output& output(job.output());
     PS::Document& document(job.document());
 #if PSDebugPageBox
     MyError err = output.str("% pagebox_setnewbox\n");
-    if (err) {
+    if (err)
         return err;
-    }
 #endif
 
     MyError err;
@@ -644,7 +641,7 @@ MyError pagebox_generateprologue(JobWS& job)
                 if (namePtr == nullptr)
                     continue;
 
-                const FontBlock* block = job.jobfontlist.head();
+                const FontNameEntry* block = job.jobfontlist.head();
                 while (block != nullptr) {
                     if (block->word() != PDriverMiscOp_PS_Font) {
                         block = block->next();
@@ -658,7 +655,7 @@ MyError pagebox_generateprologue(JobWS& job)
                     }
 
                     if (Font::Identifier::compareSegmentCaseless(namePtr, blockNamePtr) == 0) {
-                        (void)font_declare(listfont, 0, job);
+                        (void)font_declare(listfont, DeclareFont_Flag_None, job);
                         break;
                     }
                     block = block->next();

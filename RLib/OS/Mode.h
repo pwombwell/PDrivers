@@ -25,7 +25,7 @@ public:
     Mode(uint32_t number) { u.number = number; }
     Mode(ModeSelector* selector) { u.selector = selector; }
   
-    bool isNumber() const   { return u.number > 256; }
+    bool isNumber() const   { return u.number < 256; }
     bool isSelector() const { return !isNumber() && (u.number & 1) == 0; }
     bool isModeWord() const { return !isSelector(); }
   

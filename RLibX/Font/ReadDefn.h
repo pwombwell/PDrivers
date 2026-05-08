@@ -15,7 +15,7 @@ public:
 
     MyError init(FontHandle handle);
 
-    Identifier getIdentifier() { return Identifier(m_buffer); }
+    Identifier getIdentifier() const { return Identifier(m_buffer); }
     Draw::Unit pointsX() const { return m_pointsX; }
     Draw::Unit pointsY() const { return m_pointsY; }
 

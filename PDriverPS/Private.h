@@ -13,24 +13,6 @@ class Output;
 
 using namespace riscos::Geometry;
 
-/* Output a string of printable characters as a PostScript string, taking care:
- *   (a) not to produce lines of more than 72 characters.
- *   (b) to output characters outside the range ASCII 32-126 as octal escape
- *       sequences.
- *   (c) to output "(", ")" and "\\" as escape sequences.
- * Entry: str points to first character.
- *        len is number of characters.
- *        handle is the job's file handle.
- *        String is guaranteed not to contain control characters (but may
- *          include DELETEs, which will be output as octal escape sequences).
- */
-MyError output_PSstring(const uint8_t* str,
-                        uint32_t len,
-                        Output& output);
-MyError output_PSstringBackwards(const uint8_t* str,
-                                 uint32_t len,
-                                 Output& output);
-
 /* Ensure that we are using the OS co-ordinate system. */
 MyError ensure_OScoords(Output& output, JobWS& jobWS);
 
@@ -65,7 +47,6 @@ MyError output_gstring(const char* s, Output& output);
 /* Output a coordinate pair (x, y) in decimal format. */
 MyError output_coordpair(int32_t x, int32_t y, Output& output);
 MyError output_coordpair(OS::Millipoint x, OS::Millipoint y, Output& output);
-MyError output_coordpair(Offset<OS::Millipoint> value, Output& output);
 
 /* Output a coordinate pair (x, y) in decimal format. */
 MyError output_coordpair(Point<OS::Unit> value, Output& output);
@@ -73,6 +54,8 @@ MyError output_coordpair(Offset<OS::Unit> value, Output& output);
 MyError output_coordpair(Size<OS::Unit> value, Output& output);
 
 MyError output_coordpair(Point<Draw::Unit> value, Output& output);
+MyError output_coordpair(Point<OS::Millipoint> value, Output& output);
+MyError output_coordpair(Offset<OS::Millipoint> value, Output& output);
 
 /* Output the RGB value in the top 24 bits of bbGGRR00 in decimal format. */
 MyError output_rgbvalue(uint32_t bbGGRR00, Output& output);

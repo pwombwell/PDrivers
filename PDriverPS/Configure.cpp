@@ -14,15 +14,6 @@
 
 extern const uint32_t VarType_String;
 
-extern const uint32_t PDriverColour_Greys;
-extern const uint32_t PDriverInfo_TransformedSprites;
-extern const uint32_t PDriverInfo_TransformedFonts;
-extern const uint32_t PDriverInfo_ArbitraryTransforms;
-extern const uint32_t PDriverInfo_MiscOp;
-extern const uint32_t PDriverInfo_SetDevice;
-extern const uint32_t PDriverInfo_DeclareFont;
-extern const uint32_t PDriverInfo_DrawPageFlags;
-
 static const char prologue_name[] = "PDriver$PSprologue";
 static const char prologue_val[] = "Printers:ps.PSfiles.PSprolog";
 static const char prologue2_name[] = "PDriver$PSprologue2";
@@ -72,8 +63,8 @@ MyError configure_init(CoreWS& ws)
     debugLog("ps configure_init features:0x%x", ws.globalInfo.features());
 
     // Set up page size info.
-    ws.pageSize.size = FontSize(594960, 841920);
-    ws.pageSize.rect = FontRect(17280, 22080, 577680, 819840);
+    ws.pageSize.size = Font::Size(594960, 841920);
+    ws.pageSize.rect = Font::Rect(17280, 22080, 577680, 819840);
 
     // Initialise to not adding CTRL-D's to the ends of jobs, to not doing
     // auto-accent generation, and to Level1.
