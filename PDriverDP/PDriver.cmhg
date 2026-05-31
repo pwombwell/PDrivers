@@ -1,0 +1,59 @@
+; Module header description file for PDriverDP
+
+title-string: PDriverDP
+
+help-string:  Printer driver 0.01 
+
+initialisation-code: Module_Initialisation
+
+finalisation-code: Module_Finalisation
+
+; Service calls:
+;   &27: Service_Reset
+;   &46: Service_ModeChange
+;   &57: Service_WimpReportError
+;   &65: Service_PDriverStarting
+;   &78: Service_PDriverGetMessages
+service-call-handler: Module_Service &27 &46 &57 &65 &78
+
+vector-handlers: colour_vector(error-capable:),
+    draw_vector(error-capable:),
+    sprite_vector(error-capable:)
+
+vector-traps: monitor_sprite_vector, byte_vector, wrch_vector
+
+; Excape handler must specify r12 as the private word so it is not corrupted on exit.
+generic-veneers: escape_handler(private-word: r12),
+    config_callback(private-word: r12)
+
+pdriver-handler: pdriver_entry,
+	PDriver_Info_Handler,
+	PDriver_SetInfo_Handler,
+	PDriver_CheckFeatures_Handler,
+	PDriver_PageSize_Handler,
+	PDriver_SetPageSize_Handler,
+	PDriver_SelectJob_Handler,
+    PDriver_CurrentJob_Handler,
+	PDriver_FontSWI_Handler,
+	PDriver_EndJob_Handler,
+	PDriver_AbortJob_Handler,
+	PDriver_Reset_Handler,
+	PDriver_GiveRectangle_Handler,
+	PDriver_DrawPage_Handler,
+	PDriver_GetRectangle_Handler,
+	PDriver_CancelJob_Handler,
+	PDriver_ScreenDump_Handler,
+    PDriver_EnumerateJobs_Handler,
+    PDriver_SetPrinter_Handler,
+    PDriver_CancelJobWithError_Handler,
+	PDriver_SelectIllustration_Handler,
+	PDriver_InsertIllustration_Handler,
+	PDriver_DeclareFont_Handler,
+	PDriver_BadSWI_Handler,
+	PDriver_BadSWI_Handler,
+	PDriver_BadSWI_Handler,
+	PDriver_BadSWI_Handler,
+	PDriver_MiscOp_Handler,
+	PDriver_MiscOp_Handler,
+	PDriver_SetDriver_Handler,
+	PDriver_JPEGSWI_Handler,
